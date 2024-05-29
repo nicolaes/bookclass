@@ -169,10 +169,11 @@ export class App implements OnInit {
   }
 
   deleteBooking($event: Event, taskId: string) {
-    $event.preventDefault();
     this.apiService.deleteBooking(taskId).subscribe(() => {
       this.getBookings();
     });
+
+    $event.preventDefault();
     return false;
   }
 

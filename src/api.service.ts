@@ -97,6 +97,6 @@ export class ApiService {
             .set('type', 'DELETE_TASK')
             .set('queue', this._queue)
             .set('taskId', taskId);
-        return this.httpClient.get(TASKS_URL, { params });
+        return this.httpClient.get(TASKS_URL, { params, responseType: 'text' });
     }
 }
