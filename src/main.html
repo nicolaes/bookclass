@@ -59,6 +59,19 @@
         </form>
       }
       
+      @if (scheduledBookings().length > 0) {
+        <hr class="my-4">
+        <h6>Rezervări viitoare</h6>
+        <ul>
+          @for (booking of scheduledBookings(); track booking) {
+            <li><small>
+              {{ booking.className }} - 
+              <a href="#" (click)="deleteBooking($event, booking.taskId)" class="link-secondary">șterge</a>
+            </small></li>
+          }
+        </ul>
+      }
+      
     }
     
   </main>

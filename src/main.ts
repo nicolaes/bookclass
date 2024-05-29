@@ -3,9 +3,10 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { bootstrapApplication } from '@angular/platform-browser';
 import 'zone.js';
-import { Class, ClubDto, Clubs, LoginResult, Schedule } from './book.model';
-import { addDays, format, parse } from 'date-fns';
+import { ClassItem, ClubDto, Clubs, LoginResult, Schedule, ScheduledBooking } from './book.model';
+import { addDays, format, fromUnixTime, parse } from 'date-fns';
 import { ro } from 'date-fns/locale';
+import { ApiService } from './api.service';
 
 const postBody = new HttpParams().set('project', 'wcr').set('lang', '2').toString();
 const postHeaders = new HttpHeaders().set('Content-Type', 'application/x-www-form-urlencoded');
@@ -17,10 +18,8 @@ const postHeaders = new HttpHeaders().set('Content-Type', 'application/x-www-for
   imports: [FormsModule]
 })
 export class App implements OnInit {
-  private readonly httpClient = inject(HttpClient);
+  private readonly apiService = inject(ApiService);
 
-  private _token = '';
-  private _headers = postHeaders;
   username = '';
   password = '';
   loginResult = signal('');
@@ -28,46 +27,43 @@ export class App implements OnInit {
 
   clubs = signal<ClubDto[]>([]);
   days = signal<string[]>([]);
-  classes = signal<Class[]>([]);
+  classes = signal<ClassItem[]>([]);
 
   selectedClubId = '';
   selectedDay = '';
-  _allClasses: Class[] = [];
+  _allClasses: ClassItem[] = [];
   selectedClass = '';
 
+  scheduledBookings = signal<ScheduledBooking[]>([]);
 
   ngOnInit(): void {
     this.populateDays();
   }
 
   login() {
-    const creds = `email=${encodeURI(this.username)}&member_password=${encodeURI(this.password)}`;
-    const url = `https://apiv2.upfit.biz/authenticate.php?json&${creds}`;
-    this.httpClient.post<LoginResult>(url, postBody, {headers: postHeaders}).subscribe(result => {
-      if (result.token) {
-        this._token = result.token;
-        this._headers = postHeaders.set('Auth', `Bearer ${this._token}`);
-        this.loggedIn.set(true);
-        this.loginResult.set('');
+    this.logout();
+    this.apiService.login(this.username, this.password)
+      .subscribe(({ successful, error }) => {
+        this.loggedIn.set(successful);
+        if (successful) {
+          this.getClubs();
+          this.getBookings();
+          this.loginResult.set('');
+        } else {
+          this.loginResult.set(`Eroare ${error}`);
+        }
+      });
+  }
 
-        this.getClubs();
-      } else {
-        this._token = '';
-        this._headers = postHeaders;
-        this.loggedIn.set(false);
-        this.loginResult.set(`Eroare ${result.error}`);
-      }
-    });
+  logout() {
+    this.scheduledBookings.set([]);
+    this.loginResult.set('');
   }
 
   getClubs() {
-    this.httpClient.post<Clubs>('https://apiv2.upfit.biz/get-clubs.php?json', postBody, {headers: this._headers})
-      .subscribe(clubs => {
-        const clubDtos: ClubDto[] = Object.values(clubs.clubs)
-          .map(c => ({id: c.clubid, name: c.short_name}))
-          .sort((a, b) => a.name.localeCompare(b.name));
-        this.clubs.set(clubDtos);
-      });
+    this.apiService.getClubs().subscribe((clubs) => {
+      this.clubs.set(clubs);
+    });
   }
 
   selectClub(event: any) {
@@ -78,20 +74,12 @@ export class App implements OnInit {
   getClasses() {
     if (!this.selectedClubId) return;
 
-    const url = 'https://apiv2.upfit.biz/get-member-schedule.php?json&';
-    const params = new HttpParams()
-      .set('clubid', this.selectedClubId)
-      .set('type', '1')
-      .set('lang', '2')
-      .set('date_start', this.days()[0])
-      .set('date_end', this.days()[this.days().length - 1])
-      .toString();
-
     this._allClasses = [];
     this.getClassesForTheDay();
-    this.httpClient.post<Schedule>(url + params, postBody, {headers: this._headers})
-      .subscribe(res => {
-        this._allClasses = res.schedule;
+
+    this.apiService.getClasses(this.selectedClubId, this.days())
+      .subscribe((allClasses) => {
+        this._allClasses = allClasses;
         this.getClassesForTheDay();
       });
   }
@@ -111,11 +99,11 @@ export class App implements OnInit {
 
     const classes = this._allClasses
       .filter(cls => cls.date === this.selectedDay &&
-        (cls.can_book || cls.error === 'BOOKINGS_OPENES_ON') );
+        (cls.can_book || cls.error === 'BOOKINGS_OPENES_ON'));
     this.classes.set(classes);
   }
 
-  get selectedCls(): Class | undefined {
+  get selectedCls(): ClassItem | undefined {
     return this._allClasses.find(c => c.id === this.selectedClass);
   }
 
@@ -130,14 +118,61 @@ export class App implements OnInit {
 
   bookClass() {
     if (!this.selectedClass) return;
+    const selectedClassItem = this.selectedCls;
+    if (!selectedClassItem) return;
 
-    console.log('Booking', this.selectedCls);
+    this.apiService.scheduleBooking(this.selectedClubId, selectedClassItem)
+      .subscribe(() => {
+        this.getBookings();
+      });
+  }
+
+  getBookings() {
+    // https://apiv2.upfit.biz/class-booking.php?json&clubid=411&id=643794
+    this.apiService.getScheduledBookings().subscribe(bookings => {
+      this.scheduledBookings.set(bookings.map(b => {
+        const bookingDate = format(fromUnixTime(parseInt(b.scheduleTimestamp, 10)), 'PPPP, HH:mm', { locale: ro });
+        return {
+          taskId: b.id,
+          className: `Rezervare planificată ${bookingDate}`
+        };
+
+        // const url = new URL(b.url);
+        // const params = new URLSearchParams(url.search);
+
+        // const classId = params.get('id');
+        // const classItem = this._allClasses.find(c => c.id === classId);
+
+        // const clubId = params.get('clubId');
+        // const club = this.clubs().find(c => c.id === clubId)
+
+        // if (!classItem || !club) {
+        //   return {
+        //     taskId: '',
+        //     className: b.url
+        //   }
+        // }
+
+        // return {
+        //   taskId: b.id,
+        //   className: `${classItem.date} - ${classItem.name} - ${club.name}`
+        // };
+      }))
+    });
+  }
+
+  deleteBooking($event: Event, taskId: string) {
+    $event.preventDefault();
+    this.apiService.deleteBooking(taskId).subscribe(() => {
+      this.getBookings();
+    });
+    return false;
   }
 
   populateDays() {
     const today = new Date();
     const twoWeeksFromToday = addDays(today, 13);
-    const datesList = [];
+    const datesList: string[] = [];
     for (let currentDate = today; currentDate <= twoWeeksFromToday; currentDate = addDays(currentDate, 1)) {
       const formattedDate = format(currentDate, 'yyyy-MM-dd');
       datesList.push(formattedDate);
@@ -147,7 +182,7 @@ export class App implements OnInit {
 
   getDayName(day: string) {
     const date = parse(day, 'yyyy-MM-dd', new Date());
-    return format(date, 'PPPP', {locale: ro});
+    return format(date, 'PPPP', { locale: ro });
   }
 }
 
