@@ -61,7 +61,10 @@
       
       @if (scheduledBookings().length > 0) {
         <hr class="my-4">
-        <h6>Rezervări viitoare</h6>
+        <h6>
+          Rezervări viitoare
+          <a style="text-decoration: none;" href="#" (click)="refreshBookings($event)">🔄</a>
+        </h6>
         <ul>
           @for (booking of scheduledBookings(); track booking) {
             <li><small>

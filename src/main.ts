@@ -129,6 +129,7 @@ export class App implements OnInit {
 
   getBookings() {
     // https://apiv2.upfit.biz/class-booking.php?json&clubid=411&id=643794
+    this.scheduledBookings.set([]);
     this.apiService.getScheduledBookings().subscribe(bookings => {
       this.scheduledBookings.set(bookings.map(b => {
         const bookingDate = format(fromUnixTime(parseInt(b.scheduleTimestamp, 10)), 'PPPP, HH:mm', { locale: ro });
@@ -159,6 +160,12 @@ export class App implements OnInit {
         // };
       }))
     });
+  }
+
+  refreshBookings($event: Event) {
+    $event.preventDefault();
+    this.getBookings();
+    return false;
   }
 
   deleteBooking($event: Event, taskId: string) {
