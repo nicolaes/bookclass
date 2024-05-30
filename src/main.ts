@@ -15,6 +15,9 @@ const postHeaders = new HttpHeaders().set('Content-Type', 'application/x-www-for
   selector: 'app-root',
   standalone: true,
   templateUrl: './main.html',
+  styles: `
+    h1, h2 { font-family: "Leckerli One", cursive; }
+  `,
   imports: [FormsModule]
 })
 export class App implements OnInit {
@@ -110,7 +113,7 @@ export class App implements OnInit {
   get bookButtonValue(): string {
     const cls = this.selectedCls;
     if (cls?.error === 'BOOKINGS_OPENES_ON') {
-      return `Planifică rezervare: ${cls.error_details}`;
+      return `Planifică rezervare`;
     } else if (cls) {
       return `Rezervă acum !`
     } else return 'Rezervă ...';
