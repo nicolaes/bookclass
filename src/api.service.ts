@@ -44,7 +44,15 @@ export class ApiService {
             .pipe(
                 map(clubs => {
                     const clubDtos: ClubDto[] = Object.values(clubs.clubs)
-                        .map(c => ({ id: c.clubid, name: c.short_name }))
+                        .map(c => {
+                            const name = c.short_name.replace('World Class ', '');
+                            const tier: string =
+                                Object.values(c.resources).filter(t => +t.tagid <= 5)?.[0]?.name || '';
+                            return { 
+                                id: c.clubid, 
+                                name: `${name} ${tier ? ' (' + tier.toLowerCase() + ')' : ''}`
+                            };
+                        })
                         .sort((a, b) => a.name.localeCompare(b.name));
                     return clubDtos;
                 })

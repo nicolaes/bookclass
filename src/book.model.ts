@@ -10,7 +10,13 @@ export type Clubs = {
   clubs: {
     [key: string]: {
       clubid: string,
-      short_name: string
+      short_name: string,
+      resources: {
+        [key: string]: {
+          tagid: string,
+          name: string
+        }
+      }
     }
   }
 }
