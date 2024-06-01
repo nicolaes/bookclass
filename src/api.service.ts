@@ -45,7 +45,7 @@ export class ApiService {
                 map(clubs => {
                     const clubDtos: ClubDto[] = Object.values(clubs.clubs)
                         .map(c => {
-                            const name = c.short_name.replace('World Class ', '');
+                            const name = c.short_name.replace(atob('V29ybGQgQ2xhc3Mg'), '');
                             const tier: string =
                                 Object.values(c.resources).filter(t => +t.tagid <= 5)?.[0]?.name || '';
                             return { 
