@@ -131,7 +131,6 @@ export class App implements OnInit {
   }
 
   getBookings() {
-    // https://apiv2.upfit.biz/class-booking.php?json&clubid=411&id=643794
     this.scheduledBookings.set([]);
     this.apiService.getScheduledBookings().subscribe(bookings => {
       this.scheduledBookings.set(bookings.map(b => {
@@ -140,27 +139,6 @@ export class App implements OnInit {
           taskId: b.id,
           className: `Rezervare planificată ${bookingDate}`
         };
-
-        // const url = new URL(b.url);
-        // const params = new URLSearchParams(url.search);
-
-        // const classId = params.get('id');
-        // const classItem = this._allClasses.find(c => c.id === classId);
-
-        // const clubId = params.get('clubId');
-        // const club = this.clubs().find(c => c.id === clubId)
-
-        // if (!classItem || !club) {
-        //   return {
-        //     taskId: '',
-        //     className: b.url
-        //   }
-        // }
-
-        // return {
-        //   taskId: b.id,
-        //   className: `${classItem.date} - ${classItem.name} - ${club.name}`
-        // };
       }))
     });
   }

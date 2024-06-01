@@ -5,7 +5,7 @@ import { Observable, map } from "rxjs";
 import { sha256 } from "node-forge";
 import { getUnixTime, isValid, parse } from "date-fns";
 
-const BASE_URL = 'https://apiv2.upfit.biz';
+const BASE_URL = atob('aHR0cHM6Ly9hcGl2Mi51cGZpdC5iaXo=');
 const TASKS_URL = 'https://europe-west3-seventh-magnet-307411.cloudfunctions.net/bookclass';
 const postBody = new HttpParams().set('project', 'wcr').set('lang', '2').toString();
 const postHeaders = new HttpHeaders().set('Content-Type', 'application/x-www-form-urlencoded');
