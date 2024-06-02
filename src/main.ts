@@ -17,6 +17,7 @@ const postHeaders = new HttpHeaders().set('Content-Type', 'application/x-www-for
   templateUrl: './main.html',
   styles: `
     h1 {
+      font-style: italic;
       font-family: 'Graphik Compact';
       color: rgb(236, 28, 36);
     }
