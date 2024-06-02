@@ -4,10 +4,13 @@
       <h1>BookClass</h1>
     </div>
     <form (ngSubmit)="login()" class="row">
-      <div class="col-12 col-md-4 mb-3">
+      <div class="col-12">
+        <h6>Login</h6>
+      </div>
+      <div class="col-12 col-md-4 mb-2">
         <input type="text" [(ngModel)]="username" class="form-control" name="username" placeholder="E-mail" >
       </div>
-      <div class="col-12 col-md-4 mb-3">
+      <div class="col-12 col-md-4 mb-2">
         <input type="password" [(ngModel)]="password" class="form-control" name="password" placeholder="Password" >
       </div>
       <div class="col-12 col-md-4 mb-3">
@@ -23,6 +26,7 @@
     @if (loggedIn()) {
       <hr class="mt-0 mb-3">
       <div class="row mb-3">
+        <h6>Rezervă sau planifică</h6>
         <div class="col-8">
           <select class="form-select" (change)="selectClub($event)">
             <option value="">Clubul</option>
@@ -54,7 +58,8 @@
             </select>
           </div>
           <div class="col-12 col-md-4 mb-3">
-            <input class="w-100 btn btn-primary" type="submit" [value]="bookButtonValue">
+            <input class="w-100 btn btn-primary" type="submit"
+              [disabled]="!selectedCls || isBookingLoading()" [value]="bookButtonValue">
           </div>
         </form>
       }

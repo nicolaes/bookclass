@@ -16,7 +16,10 @@ const postHeaders = new HttpHeaders().set('Content-Type', 'application/x-www-for
   standalone: true,
   templateUrl: './main.html',
   styles: `
-    h1, h2 { font-family: "Leckerli One", cursive; }
+    h1 {
+      font-family: 'Graphik Compact';
+      color: rgb(236, 28, 36);
+    }
   `,
   imports: [FormsModule]
 })
@@ -27,6 +30,7 @@ export class App implements OnInit {
   password = '';
   loginResult = signal('');
   loggedIn = signal(false);
+  isBookingLoading = signal(false);
 
   clubs = signal<ClubDto[]>([]);
   days = signal<string[]>([]);
@@ -111,12 +115,14 @@ export class App implements OnInit {
   }
 
   get bookButtonValue(): string {
+    if (this.isBookingLoading()) return 'se încarcă...'
+
     const cls = this.selectedCls;
     if (cls?.error === 'BOOKINGS_OPENES_ON') {
       return `Planifică rezervare`;
     } else if (cls) {
       return `Rezervă acum !`
-    } else return 'Rezervă ...';
+    } else return '(alege o clasă)';
   }
 
   bookClass() {
@@ -124,6 +130,7 @@ export class App implements OnInit {
     const selectedClassItem = this.selectedCls;
     if (!selectedClassItem) return;
 
+    this.isBookingLoading.set(true);
     this.apiService.scheduleBooking(this.selectedClubId, selectedClassItem)
       .subscribe(() => {
         this.getBookings();
@@ -133,6 +140,7 @@ export class App implements OnInit {
   getBookings() {
     this.scheduledBookings.set([]);
     this.apiService.getScheduledBookings().subscribe(bookings => {
+      this.isBookingLoading.set(false);
       this.scheduledBookings.set(bookings.map(b => {
         const bookingDate = format(fromUnixTime(parseInt(b.scheduleTimestamp, 10)), 'PPPP, HH:mm', { locale: ro });
         return {
