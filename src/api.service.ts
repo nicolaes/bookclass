@@ -8,7 +8,14 @@ import { getUnixTime, isValid, parse } from "date-fns";
 const BASE_URL = atob('aHR0cHM6Ly9hcGl2Mi51cGZpdC5iaXo=');
 const TASKS_URL = 'https://europe-west3-seventh-magnet-307411.cloudfunctions.net/bookclass';
 const postBody = 'project=wcr';
-const postHeaders = {'Content-Type': 'application/x-www-form-urlencoded'}
+const postHeaders = {
+    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+    'Sec-Fetch-Site': 'cross-site',
+    'Sec-Fetch-Mode': 'cors',
+    'Sec-Fetch-Dest': 'empty',
+    'Origin': 'capacitor://localhost',
+    'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148'
+}
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
@@ -87,15 +94,7 @@ export class ApiService {
         const runTaskBody = {
             url: `${BASE_URL}/class-booking.php?json&clubid=${selectedClubId}&id=${selectedClass.id}`,
             method: 'POST',
-            headers: {
-                Auth: `Bearer ${this._token}`,
-                'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-                'Sec-Fetch-Site': 'cross-site',
-                'Sec-Fetch-Mode': 'cors',
-                'Sec-Fetch-Dest': 'empty',
-                'Origin': 'capacitor://localhost',
-                'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148'
-            },
+            headers: this._headers,
             body: postBody
         };
 
