@@ -1,8 +1,10 @@
+export type LoginMember = {
+  fname?: string;
+}
+
 export type LoginResult = {
   token?: string;
-  member?: {
-    fname?: string;
-  }
+  member?: LoginMember;
   error?: string;
 }
 

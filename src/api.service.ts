@@ -1,6 +1,6 @@
 import { HttpClient, HttpHeaders, HttpParams } from "@angular/common/http";
 import { Injectable, inject } from "@angular/core";
-import { ClassItem, ClubDto, Clubs, GcpTask, LoginResult, Schedule } from "./book.model";
+import { ClassItem, ClubDto, Clubs, GcpTask, LoginMember, LoginResult, Schedule } from "./book.model";
 import { Observable, map } from "rxjs";
 import { sha256 } from "node-forge";
 import { getUnixTime, isValid, parse } from "date-fns";
@@ -26,7 +26,7 @@ export class ApiService {
     private _headers: {[key: string]: string} = postHeaders;
     public get token() { return this._token; }
 
-    login(username: string, password: string): Observable<{ successful: boolean, error?: string }> {
+    login(username: string, password: string): Observable<{ successful: boolean, error?: string, member?: LoginMember }> {
         const creds = `email=${encodeURI(username)}&member_password=${encodeURI(password)}`;
         const url = `${BASE_URL}/authenticate.php?json&${creds}`;
         return this.postRequest<LoginResult>(url, `${postBody}&lang=2`, postHeaders).pipe(
@@ -35,7 +35,7 @@ export class ApiService {
                     this._queue = sha256.create().update('bookclass_' + username).digest().toHex();
                     this._token = result.token;
                     this._headers = {...postHeaders, Auth: `Bearer ${this._token}`};
-                    return { successful: true };
+                    return { successful: true, member: result.member };
                 } else {
                     this._queue = '';
                     this._token = '';

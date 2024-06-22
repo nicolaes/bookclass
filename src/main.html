@@ -3,20 +3,27 @@
     <div class="py-5 text-center">
       <h1>BookClass</h1>
     </div>
-    <form (ngSubmit)="login()" class="row">
-      <div class="col-12">
-        <h6>Login</h6>
+    @if (loggedIn()) {
+      <div class="mb-2">
+        Bună, {{ loginMemberFirstName() }}
+        <a href="#" (click)="logout($event)" class="ps-3 text-secondary">logout</a>
       </div>
-      <div class="col-12 col-md-4 mb-2">
-        <input type="text" [(ngModel)]="username" class="form-control" name="username" placeholder="E-mail" >
-      </div>
-      <div class="col-12 col-md-4 mb-2">
-        <input type="password" [(ngModel)]="password" class="form-control" name="password" placeholder="Password" >
-      </div>
-      <div class="col-12 col-md-4 mb-3">
-        <input class="w-100 btn btn-primary" type="submit" value="Login">
-      </div>
-    </form>
+    } @else {
+      <form (ngSubmit)="login()" class="row">
+        <div class="col-12">
+          <h6>Login</h6>
+        </div>
+        <div class="col-12 col-md-4 mb-2">
+          <input type="text" [(ngModel)]="username" class="form-control" name="username" placeholder="E-mail" >
+        </div>
+        <div class="col-12 col-md-4 mb-2">
+          <input type="password" [(ngModel)]="password" class="form-control" name="password" placeholder="Password" >
+        </div>
+        <div class="col-12 col-md-4 mb-3">
+          <input class="w-100 btn btn-primary" type="submit" value="Login">
+        </div>
+      </form>
+    }
     @if (loginResult()) {
       <div class="row">
         <div class="col-12 mb-3"> {{ loginResult() }} </div>

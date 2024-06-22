@@ -30,6 +30,7 @@ export class App implements OnInit {
   username = '';
   password = '';
   loginResult = signal('');
+  loginMemberFirstName = signal('');
   loggedIn = signal(false);
   isBookingLoading = signal(false);
 
@@ -51,20 +52,24 @@ export class App implements OnInit {
   login() {
     this.logout();
     this.apiService.login(this.username, this.password)
-      .subscribe(({ successful, error }) => {
+      .subscribe(({ successful, error, member }) => {
         this.loggedIn.set(successful);
         if (successful) {
           this.getClubs();
           this.getBookings();
           this.loginResult.set('');
+          this.loginMemberFirstName.set(member?.fname || 'utilizator');
         } else {
           this.loginResult.set(`Eroare ${error}`);
         }
       });
   }
 
-  logout() {
+  logout(e?: Event) {
+    e?.preventDefault();
+
     this.scheduledBookings.set([]);
+    this.loggedIn.set(false);
     this.loginResult.set('');
   }
 
