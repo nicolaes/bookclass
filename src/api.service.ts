@@ -27,7 +27,7 @@ export class ApiService {
     public get token() { return this._token; }
 
     login(username: string, password: string): Observable<{ successful: boolean, error?: string, member?: LoginMember }> {
-        const creds = `email=${encodeURI(username)}&member_password=${encodeURI(password)}`;
+        const creds = `email=${encodeURIComponent(username)}&member_password=${encodeURIComponent(password)}`;
         const url = `${BASE_URL}/authenticate.php?json&${creds}`;
         return this.postRequest<LoginResult>(url, `${postBody}&lang=2`, postHeaders).pipe(
             map((result) => {
