@@ -3,7 +3,7 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { bootstrapApplication } from '@angular/platform-browser';
 import 'zone.js';
-import { ClassItem, ClubDto, Clubs, LoginResult, Schedule, ScheduledBooking } from './book.model';
+import { BookingDto, ClassItem, ClubDto, Clubs, LoginResult, Schedule, ScheduledBooking } from './book.model';
 import { addDays, format, fromUnixTime, parse } from 'date-fns';
 import { ro } from 'date-fns/locale';
 import { ApiService } from './api.service';
@@ -37,6 +37,7 @@ export class App implements OnInit {
   clubs = signal<ClubDto[]>([]);
   days = signal<string[]>([]);
   classes = signal<ClassItem[]>([]);
+  registeredBookings = signal<BookingDto[]>([]);
 
   selectedClubId = '';
   selectedDay = '';
@@ -56,7 +57,8 @@ export class App implements OnInit {
         this.loggedIn.set(successful);
         if (successful) {
           this.getClubs();
-          this.getBookings();
+          this.getRegisteredBookings();
+          this.getScheduledBookings();
           this.loginResult.set('');
           this.loginMemberFirstName.set(member?.fname || 'utilizator');
         } else {
@@ -77,6 +79,18 @@ export class App implements OnInit {
     this.apiService.getClubs().subscribe((clubs) => {
       this.clubs.set(clubs);
     });
+  }
+
+  getRegisteredBookings() {
+    this.apiService.getRegisteredBookings().subscribe((bookings) => {
+      this.registeredBookings.set(bookings);
+    });
+  }
+
+  refreshRegisteredBookings($event: Event) {
+    $event.preventDefault();
+    this.getScheduledBookings();
+    return false;
   }
 
   selectClub(event: any) {
@@ -139,11 +153,11 @@ export class App implements OnInit {
     this.isBookingLoading.set(true);
     this.apiService.scheduleBooking(this.selectedClubId, selectedClassItem)
       .subscribe(() => {
-        this.getBookings();
+        this.getScheduledBookings();
       });
   }
 
-  getBookings() {
+  getScheduledBookings() {
     this.scheduledBookings.set([]);
     this.apiService.getScheduledBookings().subscribe(bookings => {
       this.isBookingLoading.set(false);
@@ -157,15 +171,15 @@ export class App implements OnInit {
     });
   }
 
-  refreshBookings($event: Event) {
+  refreshScheduledBookings($event: Event) {
     $event.preventDefault();
-    this.getBookings();
+    this.getScheduledBookings();
     return false;
   }
 
   deleteBooking($event: Event, taskId: string) {
     this.apiService.deleteBooking(taskId).subscribe(() => {
-      this.getBookings();
+      this.getScheduledBookings();
     });
 
     $event.preventDefault();

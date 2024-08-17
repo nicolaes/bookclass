@@ -74,8 +74,8 @@
       @if (scheduledBookings().length > 0) {
         <hr class="mt-0 mb-3">
         <h6>
-          Rezervări viitoare
-          <a style="text-decoration: none;" href="#" (click)="refreshBookings($event)">🔄</a>
+          Rezervări planificate
+          <a style="text-decoration: none;" href="#" (click)="refreshScheduledBookings($event)">🔄</a>
         </h6>
         <ul>
           @for (booking of scheduledBookings(); track booking) {
@@ -86,7 +86,24 @@
           }
         </ul>
       }
+      
+      @if (registeredBookings().length > 0) {
+        <hr class="mt-0 mb-3">
+        <h6>
+          Rezervări înregistrate
+          <a style="text-decoration: none;" href="#" (click)="refreshRegisteredBookings($event)">🔄</a>
+        </h6>
+        <ul>
+          @for (regBooking of registeredBookings(); track regBooking) {
+            <li><small>
+              {{ regBooking.class_name }} - {{ regBooking.club }} - {{ regBooking.date_time }}
+              @if (regBooking.waiting_list == 0) {
+                (pe lista de așteptare: {{ regBooking.waiting_list }})
+              }
+            </small></li>
+          }
+        </ul>
+      }
     }
   </main>
 </div>
-

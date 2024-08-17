@@ -23,6 +23,29 @@ export type Clubs = {
   }
 }
 
+export type Bookings = {
+  booking: {
+    class: {
+      date: string;
+      hour: string;
+      name: string;
+      trainers: {
+        name: string;
+      };
+    };
+    club: string;
+    type: string;
+    waiting_list_place: string;
+  }[]
+}
+
+export type BookingDto = {
+  date_time: string;
+  class_name: string;
+  club: string;
+  waiting_list: number;
+}
+
 export type ClubDto = {
   id: string;
   name: string;

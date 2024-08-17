@@ -1,9 +1,10 @@
 import { HttpClient, HttpHeaders, HttpParams } from "@angular/common/http";
 import { Injectable, inject } from "@angular/core";
-import { ClassItem, ClubDto, Clubs, GcpTask, LoginMember, LoginResult, Schedule } from "./book.model";
+import { BookingDto, Bookings, ClassItem, ClubDto, Clubs, GcpTask, LoginMember, LoginResult, Schedule } from "./book.model";
 import { Observable, map } from "rxjs";
 import { sha256 } from "node-forge";
-import { getUnixTime, isValid, parse } from "date-fns";
+import { format, getUnixTime, isValid, parse } from "date-fns";
+import { ro } from "date-fns/locale";
 
 const BASE_URL = atob('aHR0cHM6Ly9hcGl2Mi51cGZpdC5iaXo=');
 const TASKS_URL = 'https://europe-west3-seventh-magnet-307411.cloudfunctions.net/bookclass';
@@ -63,6 +64,25 @@ export class ApiService {
                         .sort((a, b) => a.name.localeCompare(b.name));
                     return clubDtos;
                 })
+            );
+    }
+
+    getRegisteredBookings(): Observable<BookingDto[]> {
+        const url = `${BASE_URL}/member-bookings.php?json&`;
+        const params = new HttpParams()
+            .set('date_start', format(new Date(), 'yyyy-MM-dd'))
+            .set('main_page', 'app_class-tab3')
+            .toString();
+        return this.postRequest<Bookings>(url + params, postBody, this._headers)
+            .pipe(
+                map(bookings => bookings?.booking?.map(b => ({
+                    date_time: format(
+                        parse(`${b.class.date} ${b.class.hour}`, "yyyy-MM-dd HH:mm", new Date()),
+                        'PPPP, HH:mm', { locale: ro }),
+                    class_name: `${b.class.name} - ${b.class.trainers.name}`,
+                    club: b.club.replace(atob('V29ybGQgQ2xhc3Mg'), ''),
+                    waiting_list: Number(b.waiting_list_place) || 0
+                })) || [])
             );
     }
 
