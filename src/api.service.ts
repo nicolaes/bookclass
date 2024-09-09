@@ -73,16 +73,28 @@ export class ApiService {
             .set('date_start', format(new Date(), 'yyyy-MM-dd'))
             .set('main_page', 'app_class-tab3')
             .toString();
+
+        const parseClassDate = (c: {date: string, hour: string}): Date =>
+            parse(`${c.date} ${c.hour}`, "yyyy-MM-dd HH:mm", new Date());
         return this.postRequest<Bookings>(url + params, postBody, this._headers)
             .pipe(
-                map(bookings => bookings?.booking?.map(b => ({
-                    date_time: format(
-                        parse(`${b.class.date} ${b.class.hour}`, "yyyy-MM-dd HH:mm", new Date()),
-                        'PPPP, HH:mm', { locale: ro }),
-                    class_name: `${b.class.name} - ${b.class.trainers.name}`,
-                    club: b.club.replace(atob('V29ybGQgQ2xhc3Mg'), ''),
-                    waiting_list: Number(b.waiting_list_place) || 0
-                })) || [])
+                map(bookings => {
+                    if (!bookings?.booking) return [];
+
+                    const bookingList = Array.isArray(bookings?.booking)
+                        ? bookings?.booking : [bookings?.booking];
+                    return bookingList
+                        .filter(b => (
+                            parseClassDate(b.class) > new Date() &&
+                            ['WAITING LIST', 'BOOKED'].includes(b.type)
+                        ))
+                        .map(b => ({
+                            date_time: format(parseClassDate(b.class), 'PPPP, HH:mm', { locale: ro }),
+                            class_name: `${b.class.name} - ${b.class.trainers.name}`,
+                            club: b.club.replace(atob('V29ybGQgQ2xhc3Mg'), ''),
+                            waiting_list: Number(b.waiting_list_place) || 0
+                        }));
+                })
             );
     }
 

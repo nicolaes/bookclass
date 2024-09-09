@@ -97,8 +97,10 @@
           @for (regBooking of registeredBookings(); track regBooking) {
             <li><small>
               {{ regBooking.class_name }} - {{ regBooking.club }} - {{ regBooking.date_time }}
-              @if (regBooking.waiting_list == 0) {
+              @if (regBooking.waiting_list !== 0) {
                 (pe lista de așteptare: {{ regBooking.waiting_list }})
+              } @else {
+                (rezervată)
               }
             </small></li>
           }
