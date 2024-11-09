@@ -134,7 +134,7 @@ export class ApiService {
             url: `${TASKS_URL}?type=RUN_TASK`,
             body: btoa(JSON.stringify(runTaskBody)),
             headers: { 'Content-Type': 'application/json' },
-            scheduleTimestamp: getUnixTime(scheduleDate)
+            scheduleTimestamp: getUnixTime(scheduleDate) + 60
         };
 
         const params = new HttpParams()
