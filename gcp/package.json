@@ -1,0 +1,7 @@
+{
+    "dependencies": {
+        "@google-cloud/functions-framework": "^3.0.0",
+        "@google-cloud/tasks": "^5.4.0",
+        "axios": "^1.7.2"
+    }
+}

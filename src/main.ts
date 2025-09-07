@@ -89,7 +89,7 @@ export class App implements OnInit {
 
   refreshRegisteredBookings($event: Event) {
     $event.preventDefault();
-    this.getScheduledBookings();
+    this.getRegisteredBookings();
     return false;
   }
 

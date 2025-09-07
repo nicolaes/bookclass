@@ -7,7 +7,7 @@ import { format, getUnixTime, isValid, parse } from "date-fns";
 import { ro } from "date-fns/locale";
 
 const BASE_URL = atob('aHR0cHM6Ly9hcGl2Mi51cGZpdC5iaXo=');
-const TASKS_URL = 'https://europe-west3-seventh-magnet-307411.cloudfunctions.net/bookclass';
+const TASKS_URL = 'https://bookclass-west1-745170904964.europe-west1.run.app';
 const postBody = 'project=wcr';
 const postHeaders = {
     'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
